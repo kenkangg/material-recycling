@@ -16,6 +16,7 @@ IEOR 135/290 Data-X: Recycle.ai Files
 ### Dataset
 > Dataset used for our project
 * Split into 6 classes: Cardboard, Glass, Metal, Paper, Plastic, Trash
+* 75/15/10 Train/Validation/Test split
 * Most of data from Stanford TrashNet project with added data from our mentor.
 
 
