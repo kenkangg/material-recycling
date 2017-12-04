@@ -17,7 +17,7 @@ import numpy as np
 width, height = 150, 150
 
 training_path = "/datasets/train"
-val_path = "/datasets/validation"
+# val_path = "validation"
 # training_path = "trashnet_data/train"
 # val_path = "trashnet_data/validation"
 n_train = 2400
@@ -25,10 +25,19 @@ n_val = 400
 epochs = 50
 batch_size = 32
 
+
+
 if K.image_data_format() =='channels_first':
     input_shape = (3, width, height)
 else:
     input_shape = (width, height, 3)
+
+# test_data = ImageDataGenerator(rescale=1./255)
+# validation = test_data.flow_from_directory(
+#         val_path,
+#         class_mode='categorical',
+#         batch_size=batch_size,
+#         target_size=(150,150))
 
 
 # create the base pre-trained model
@@ -47,13 +56,19 @@ predictions = Dense(6, activation='softmax')(x)
 model = Model(inputs=base_model.input, outputs=predictions)
 
 model.load_weights("trash-weights.hdf5")
+print("loaded")
+
+# # prediction = model.predict_generator(validation, steps = 1000)
+# print(prediction)
+
 
 from scipy import misc
 import os
 import os.path
-for f in os.listdir("untitled folder"):
+from skimage.transform import resize
+for f in os.listdir("test"):
     print(f)
-    image = misc.imread("untitled folder/" +f).reshape(1,512,384,3)
+    image = resize(misc.imread("test/" +f),(150,150,3)).reshape(1,150,150,3)
 
     prediction = model.predict(image)
-    print(prediction)
+    print("prediction", np.argmax(prediction,axis = 1))
