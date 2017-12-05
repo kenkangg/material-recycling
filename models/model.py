@@ -43,10 +43,10 @@ model.add(Dense(100))
 model.add(Activation('relu'))
 model.add(Dense(100))
 model.add(Activation('relu'))
-model.add(Dense(6))
+model.add(Dense(1))
 model.add(Activation('sigmoid'))
 
-model.compile(loss=keras.losses.categorical_crossentropy,
+model.compile(loss="binary_crossentropy",
         optimizer=keras.optimizers.Adadelta(),
         metrics=['accuracy'])
 
@@ -62,13 +62,13 @@ test_data = ImageDataGenerator(rescale=1./255)
 
 train = train_data.flow_from_directory(
         training_path,
-        class_mode='categorical',
+        class_mode='binary',
         batch_size=batch_size,
         target_size=(width,height))
 
 validation = test_data.flow_from_directory(
         val_path,
-        class_mode='categorical',
+        class_mode='binary',
         batch_size=batch_size,
         target_size=(width,height))
 

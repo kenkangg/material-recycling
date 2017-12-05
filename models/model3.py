@@ -14,6 +14,7 @@ from keras import backend as K
 import keras
 import numpy as np
 from skimage.transform import resize
+from keras.optimizers import SGD
 
 width, height = 150, 150
 
@@ -23,7 +24,6 @@ val_path = "/datasets/validation"
 # val_path = "trashnet_data/validation"
 n_train = 2400
 n_val = 400
-epochs = 50
 batch_size = 32
 
 if K.image_data_format() =='channels_first':
@@ -46,9 +46,11 @@ x = base_model.output
 x = GlobalAveragePooling2D()(x)
 # let's add a fully-connected layer
 # x = Flatten()(x)
-x = Dense(1024, activation='relu')(x)
-x = Dropout(0.5)(x)
-x = Dense(1024, activation='relu')(x)
+x = Dense(1000, activation='relu')(x)
+x = Dropout(0.2)(x)
+x = Dense(1000, activation='relu')(x)
+x = Dropout(0.2)(x)
+x = Dense(1000, activation='relu')(x)
 # and a logistic layer -- let's say we have 200 classes
 predictions = Dense(6, activation='softmax')(x)
 
@@ -62,7 +64,7 @@ for layer in base_model.layers:
     layer.trainable = False
 
 # compile the model (should be done *after* setting layers to non-trainable)
-model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
+model.compile(optimizer=SGD(lr=0.01 , momentum=0.9), loss='categorical_crossentropy', metrics=['categorical_accuracy'])
 
 
 
@@ -91,7 +93,7 @@ validation = test_data.flow_from_directory(
 history = model.fit_generator(
         train,
         steps_per_epoch = n_train // batch_size,
-        epochs = 10,
+        epochs = 30,
         validation_data = validation,
         validation_steps = n_val // batch_size
         )
@@ -106,27 +108,26 @@ with open('/output/myfile0.txt', 'a') as f:
 
 # let's visualize layer names and layer indices to see how many layers
 # we should freeze:
-# for i, layer in enumerate(base_model.layers):
-#    print(i, layer.name)
+for i, layer in enumerate(base_model.layers):
+   print(i, layer.name)
 
 # we chose to train the top 2 inception blocks, i.e. we will freeze
 # the first 249 layers and unfreeze the rest:
-for layer in model.layers[:249]:
+for layer in model.layers[:101]:
    layer.trainable = False
-for layer in model.layers[249:]:
+for layer in model.layers[101:]:
    layer.trainable = True
 
 # we need to recompile the model for these modifications to take effect
 # we use SGD with a low learning rate
-from keras.optimizers import SGD
-model.compile(optimizer=SGD(lr=0.0001 , momentum=0.9), loss='categorical_crossentropy', metrics=['categorical_accuracy'])
+model.compile(optimizer=SGD(lr=0.01 , momentum=0.9), loss='categorical_crossentropy', metrics=['categorical_accuracy'])
 
 # we train our model again (this time fine-tuning the top 2 inception blocks
 # alongside the top Dense layers
 history = model.fit_generator(
         train,
         steps_per_epoch = n_train // batch_size,
-        epochs = 15,
+        epochs = 30,
         validation_data = validation,
         validation_steps = n_val // batch_size
         )
@@ -135,7 +136,10 @@ with open('/output/myfile.txt', 'a') as f:
     f.write(str(history.history))
 
 model.save_weights('/output/trash-weights.hdf5')
-model.save('my_model.h5')
+model.save('/output/my_model.h5')
+
+# from keras.utils import plot_model
+# plot_model(model, to_file='/output/model.png')
 
 
 
