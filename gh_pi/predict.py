@@ -68,8 +68,8 @@ if __name__ == "__main__":
                                  passwd=DBPass, db=DBName)
 
     # create an S3 service client, set up your own account 
-    access_key = 'AKIAIBG33I6NY6VEXJAA'
-    secret_key = 'p2ltMgH/1g7lv2Am8BpW6NrRZNfuHFiQyM/IhR+o'
+    access_key = 'Enter Access Key'
+    secret_key = 'Enter Secret Key'
     client = boto3.client('s3', aws_access_key_id=access_key,
                           aws_secret_access_key=secret_key)
 
